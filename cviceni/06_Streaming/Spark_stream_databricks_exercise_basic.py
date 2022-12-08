@@ -18,9 +18,10 @@
 # MAGIC 
 # MAGIC We are strearimg continously (every 1 min) into 5 kafka topics, which are named: *trams, trains, buses, regbuses, boats*. It is possible, that sometimes the streams may be cut off, if so, tell teachers and it will be promptly fixed.
 # MAGIC 
-# MAGIC Every data input in stream consist of information about one vehicle, its location and information/specification.
+# MAGIC Every data input in stream consist of information about one vehicle, its location and information/specification. This means, that there may be several inputs for each vehicle!!!
 # MAGIC 
-# MAGIC Running the following cell will load the content of the *pid_schema* notebook, we need schema saved there.
+# MAGIC 
+# MAGIC Running the following cell will load the content of the *pid_schema* notebook, we need schema saved there. This notebook has to be in the same repo.
 
 # COMMAND ----------
 
@@ -171,7 +172,8 @@ select_stream = select_base_trams.writeStream \
 # MAGIC There are plenty of options, how to do this. 
 # MAGIC 
 # MAGIC Some points which you may find helpfull:
-# MAGIC  * If not sure, take a quick peek onto [https://www.w3schools.com/sql/sql_syntax.asp](https://www.w3schools.com/sql/sql_syntax.asp) for syntax and commands help.
+# MAGIC  * If not sure, take a quick peek onto [https://docs.databricks.com/sql/language-manual/index.html](https://docs.databricks.com/sql/language-manual/index.html) for documentation for databricks sql or [https://www.w3schools.com/sql/sql_syntax.asp](https://www.w3schools.com/sql/sql_syntax.asp) for syntax and commands help.
+# MAGIC 
 # MAGIC  * Look at the variables in properties. Some may be helpfull, some are not.
 # MAGIC  * Think about what you want to do and start from the elementary commands - eg. print only lines of trams, or print number of trams - maybe *count* could help
 # MAGIC    * %sql select count(some_variable) from trams
@@ -197,7 +199,7 @@ select_stream = select_base_trams.writeStream \
 # MAGIC 
 # MAGIC If you look closely into the structure of the topics, you will find out, that there are no names of the stations. Only thing we got there are IDs of the station. Since we are trying to find those stations, that fit the description, we need to find their names. 
 # MAGIC 
-# MAGIC First we will need to load following file called *stops.json*. In which there are information about all stops, which we are in dire need of. File comes from *PID* database -[link](https://data.pid.cz/stops/json/stops.json). For better loading and readability some minor changes to it were performed.
+# MAGIC First we will need to load following file called *stops.json*. This file you have to download and save somewhere into the databricks! One option is to save it into DBFS FileStore. In which there are information about all stops, which we are in dire need of. File comes from *PID* database -[link](https://data.pid.cz/stops/json/stops.json). For better loading and readability some minor changes to it were performed. You can download the file from the link, however you will need to do some cleaning on it. Or you can download the file from the github profinit/BDT repo and upload it to the filestore, for which you don't have to do any more work.
 # MAGIC 
 # MAGIC Since the file contains more jsons, we need to use the *multiline* option. You should store the file in dbfs, so you can read it easily. 
 
@@ -277,7 +279,7 @@ df.createOrReplaceTempView("stops")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Another tables for manipulating the data. In these we will copy arrival times, ID of the stop, number of the line of the bus/tram, vehicle ID and vehicle type. We will make these tables for both of the vehicle types. To do by you.
+# MAGIC Create another tables for manipulating the data. In these we will copy arrival times, ID of the stop, number of the line of the bus/tram, vehicle ID and vehicle type. We will make these tables for both of the vehicle types. To do by you.
 
 # COMMAND ----------
 
@@ -297,3 +299,5 @@ df.createOrReplaceTempView("stops")
 # MAGIC Saving your output into the table and not into memory maybe way better.
 # MAGIC 
 # MAGIC Remember, if the stream is not working, it may not be your fault, check with your peers. 
+# MAGIC 
+# MAGIC  #### REMEMBER TO TERMINATE YOUR CLUSTERS IF YOU WON'T BE USING THEM. WITH THE STREAM RUNNING, THE CLUSTER IS ACTIVE AND IT WON'T AUTOTURN OFF WITH INACTIVITY!!!
