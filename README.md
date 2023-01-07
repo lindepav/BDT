@@ -12,3 +12,22 @@ CVUT FEL BDT course
 * [Apache Spark manual](https://spark.apache.org/docs/1.6.0/)
 * [PySpark SQL manual](http://spark.apache.org/docs/1.6.0/api/python/pyspark.sql.html)
 * [CSV files import/export](https://github.com/databricks/spark-csv)
+
+
+## Connect to hadoop metacentrum server
+https://dashboard.cloud.muni.cz/project/instances/
+1. Use private key to connect to the instance (second IP address) 
+`sudo ssh -i /Users/lindepav/.ssh/bdt_kp4.pem debian@147.251.115.238`
+2. (initial setup)
+`sudo /usr/local/sbin/hadoop-single-setup.sh`
+3. This is linux (debian type) server, to go to hadoop, use `hdfs` commands 
+
+## Foldering on server/hadoop
+### Linux
+- umístění: /home/username (nebo podobně)
+- lze se přesunout příkazem cd → relativní cesta vede
+z aktuální polohy (zjistíme příkazem pwd)
+### HDFS
+- umístění: /user/username
+- nelze se přesunout → relativní cesta vede vždy
+odtud
