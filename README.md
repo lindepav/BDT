@@ -19,15 +19,32 @@ https://dashboard.cloud.muni.cz/project/instances/
 1. Use private key to connect to the instance (second IP address) 
 `sudo ssh -i /Users/lindepav/.ssh/bdt_kp4.pem debian@147.251.115.238`
 2. (initial setup)
+- Generated password: h2rovW/6
 `sudo /usr/local/sbin/hadoop-single-setup.sh`
-3. This is linux (debian type) server, to go to hadoop, use `hdfs` commands 
+3. Set Kerberos HTTP SPNEGO authentication by runnning `kinit`
+- enter password from `password.txt`
+4. This is linux (debian type) edge node, to go to hadoop, use `hdfs` commands 
 
-## Foldering on server/hadoop
-### Linux
-- umístění: /home/username (nebo podobně)
-- lze se přesunout příkazem cd → relativní cesta vede
-z aktuální polohy (zjistíme příkazem pwd)
-### HDFS
-- umístění: /user/username
-- nelze se přesunout → relativní cesta vede vždy
+
+### HDFS commands (more in `hdfs-cheatsheet.pdf`)
+`hdfs dfs -akce [param] [soubor/adresář]`
+- `ls` → výpis adresáře
+- `mkdir` → vytvoření adresáře
+- `cp` → kopírování v rámci HDFS
+- `mv` → přesun v rámci HDFS
+- `rm` → mazání souboru nebo adresáře
+- `put` → kopírování z lokálního FS na HDFS
+- `get` → kopírování z HDFS na lokální FS
+- `cat` → výpis obsahu souboru
+- `chmod` → změna přístupových práv
+
+### Foldering on server/hadoop
+#### Linux (edge node)
+- umístění: `/home/username` (nebo podobně)
+- lze se přesunout příkazem `cd` → relativní cesta vede
+z aktuální polohy (zjistíme příkazem `pwd`)
+#### HDFS
+- umístění: `/user/username`
+- **nelze se přesunout** → relativní cesta vede vždy
 odtud
+

@@ -7,6 +7,8 @@
     <list default="true" id="a30f782b-1450-4495-8f8e-23faf7af7f9d" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cviceni/01_CLUSTER_BASICS/01_cluster.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/cviceni/01_CLUSTER_BASICS/01_cluster.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cviceni/dodatek_SQL_PYTHON/01_linux_hdfs.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/cviceni/dodatek_SQL_PYTHON/01_linux_hdfs.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,7 +66,7 @@
       <workItem from="1668444412750" duration="151000" />
       <workItem from="1670407817225" duration="1094000" />
       <workItem from="1670605650998" duration="25000" />
-      <workItem from="1673089571825" duration="2997000" />
+      <workItem from="1673089571825" duration="5560000" />
     </task>
     <servers />
   </component>
