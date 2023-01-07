@@ -1,0 +1,371 @@
+Index: cviceni/02_HIVE/Hive.ipynb
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{\n\t\"cells\": [{\n\t\t\t\"cell_type\": \"markdown\",\n\t\t\t\"metadata\": {},\n\t\t\t\"source\": [\n\t\t\t\t\"The aim of the exercise is to try out:\\n\",\n\t\t\t\t\"* how to get data into Hadoop\\n\",\n\t\t\t\t\"* different ways to store data in Hive (partitioning, format, compression)\\n\",\n\t\t\t\t\"* SQL querying over big data\"\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"cell_type\": \"markdown\",\n\t\t\t\"metadata\": {},\n\t\t\t\"source\": [\n\t\t\t\t\"## Uploading data to Hadoop\\n\",\n\t\t\t\t\"We will work with records of PID data (routes, trips, stops).\\n\",\n\t\t\t\t\"We will work with open PID data that are desribed on https://pid.cz/o-systemu/opendata/#h-gtfs.\",\n\t\t\t\t\"The zip file we work with is downloadable from http://data.pid.cz/PID_GTFS.zip\\n\",\n\t\t\t\t\"Store data on HDFS: `hive_02/PID_GTFS`\\n\",\n\t\t\t\t\"* **How do you create a new folder on HDFS?**\\n\",\n\t\t\t\t\"* **How do you copy data a previous created folder on HDFS?**\\n\",\n\t\t\t\t\"* **Is ZIP suitable format for HDFS?**\\n\",\n\t\t\t\t\"* look at a few rows of the unzipped data to see the total number of rows (and try to answer the question of why this is a good thing to do);\\n\"\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"cell_type\": \"markdown\",\n\t\t\t\"metadata\": {},\n\t\t\t\"source\": [\n\t\t\t\t\"## Starting the Hive console\\n\",\n\t\t\t\t\"Start Hive from the command line via `hive` command.\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"If you haven't created your Hive database yet, create one (enter the database name as your username) and switch to it. Hive commands must be terminated with a semicolon!\\n\"\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"cell_type\": \"markdown\",\n\t\t\t\"metadata\": {},\n\t\t\t\"source\": [\n\t\t\t\t\"## 1. Input data as external table\\n\",\n\t\t\t\t\"1.1 From the files uploaded to HDFS in the previous step choose the file routes.txt and copy them to a new folder /ext_tables/routes/\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"1.2 Create external table *route_ext* (The external table uses the data structure as is, no format changes etc. are made in this step.)\\n\",\n\t\t\t\t\"  * CSV (text) format\\n\",\n\t\t\t\t\"  * field separator is \\\",\\\"\\n\",\n\t\t\t\t\"  * the record separator is the line break character\\n\",\n\t\t\t\t\"  * the first line contains the headers and is skipped\\n\",\n\t\t\t\t\"  * the file contains the following fields:\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"| Field | Type | Description |\\n\",\n\t\t\t\t\"|-------------|-----------|--------------------------------------------|\\n\",\n\t\t\t\t\"| route_id | string | id of the route |\\n\",\n\t\t\t\t\"| agency_id | string | id of the agency |\\n\",\n\t\t\t\t\"| route_short_name | string | short name of the route |\\n\",\n\t\t\t\t\"| route_long_name |string | short name of the route  |\\n\",\n\t\t\t\t\"| route_type | string | ? |\\n\",\n\t\t\t\t\"| route_url | string | url of the route |\\n\",\n\t\t\t\t\"| route_color | string | ? |\\n\",\n\t\t\t\t\"| route_text_color | string |? |\\n\",\n\t\t\t\t\"| is_night | boolean | if it is night route |\\n\",\n\t\t\t\t\"| is_regional | boolean | if it is regioanl route |\\n\",\n\t\t\t\t\"| is_substitute_transport | boolean | if it is substitional route|\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"1.3 Run SQL queries performed on the external table. Check:\\n\",\n\t\t\t\t\"  * extract a few rows of table *route_ext* and compare with input data;\\n\",\n\t\t\t\t\"  * total number of rows and compare with input data (should not be exactly the same &ndash; why?);\\n\",\n\t\t\t\t\"  * number of rows with NULL values for the fields (should be a zero of the total number of rows).\\n\",\n\t\t\t\t\"\\n\"\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"cell_type\": \"markdown\",\n\t\t\t\"metadata\": {},\n\t\t\t\"source\": [\n\t\t\t\t\"## 2. Conversion to optimized table\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"2.1 Create an empty internal (managed) table *route* in which the data will be stored in a more suitable format and compressed:\\n\",\n\t\t\t\t\"  * parquet format\\n\",\n\t\t\t\t\"  * without partitioning\\n\",\n\t\t\t\t\"  * snappy compression (need to specify uppercase SNAPPY)\\n\",\n\t\t\t\t\"  * all fields will be the same\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"2.2 Insert the data from the *route_ext* table into the *route* table:\\n\",\n\t\t\t\t\"  * convert boolean fields\\n\",\n\t\t\t\t\"  * convert the other fields unchanged.\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"2.3 Check the *route* table:\\n\",\n\t\t\t\t\"  * List a few rows.\\n\",\n\t\t\t\t\"  * Find the number of records in the table *route* and compare with the number of records in the table *route_ext*.\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"2.4 The *route* table is internal, and thus owned by Hive.\\n\",\n\t\t\t\t\"  * Find it on HDFS under `hdfs://172.16.102.123:8020/user/hive/warehouse/your_database_name.db` and find its size (number of MB).\\n\",\n\t\t\t\t\"  * The IP address should correspond with your cluster. \\n \",\n\t\t\t\t\"  * Compare the size with the size of the external table (the data you uploaded to HDFS, see above).\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"2.5 In Hive, drop the external table *route_ext* (DROP TABLE). Check that the table is no longer in your database, but the data is still on HDFS.\"\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"cell_type\": \"markdown\",\n\t\t\t\"metadata\": {},\n\t\t\t\"source\": [\n\t\t\t\t\"## 3. Table with partitions\\n\",\n\t\t\t\t\"3.1 From the files uploaded to HDFS in the step one choose the file stop_times.txt and copy them to a newly created folder /ext_tables/stop_times/\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"3.2 Create external table *stop_times_ext* (The external table uses the data structure as is, no format changes etc. are made in this step.)\\n\",\n\t\t\t\t\"  * CSV (text) format\\n\",\n\t\t\t\t\"  * field separator is \\\",\\\"\\n\",\n\t\t\t\t\"  * the record separator is the line break character\\n\",\n\t\t\t\t\"  * the first line contains the headers and is skipped\\n\",\n\t\t\t\t\"  * determine fields from the file\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"2.1 Create an empty internal (managed) table *stop_times_part* in which the data will be stored in a more suitable format and compressed:\\n\",\n\t\t\t\t\"  * parquet format\\n\",\n\t\t\t\t\"  * with partititioning. Partitioning column name will be named route_id\\n\",\n\t\t\t\t\"  * snappy compression (need to specify uppercase SNAPPY)\\n\",\n\t\t\t\t\"  * all the otheres fields will be the same as the stop_times_ext table\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"3.2 Copy the data from table *stop_times_ext* into table *stop_times_part*, creating dynamic partitioning by route_id when copying. Dynamic partitioning must be enabled in advance using the commands:  \\n\",\n\t\t\t\t\"```\\n\",\n\t\t\t\t\"set hive.exec.dynamic.partition=true;\\n\",\n\t\t\t\t\"set hive.exec.dynamic.partition.mode=nonstrict;\\n\",\n\t\t\t\t\"```\\n\",\n\t\t\t\t\"The new route_id column is calculated by the command\\n\",\n\t\t\t\t\"```\\n\",\n\t\t\t\t\"concat('L',REGEXP_EXTRACT(trip_id, '[0-9]*',0))\\n\",\n\t\t\t\t\"```\\n\",\n\t\t\t\t\"3.3 Locate the *stop_times_part* table on HDFS under `hdfs://172.16.102.123:8020/user/hive/warehouse/your_databaase_name.db` and see how the partitioning is implemented.\"\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"cell_type\": \"markdown\",\n\t\t\t\"metadata\": {},\n\t\t\t\"source\": [\n\t\t\t\t\"## 4. Inquiry over Hive\\n\",\n\t\t\t\t\"Work with the *route* and *stop_times_part* table.\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"4.1 Find out how many unique routes are there. *(816)*\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"4.2 Find out the lowest and highest route number are there. *(1, 997)*\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"4.3 Find out the longest and the shortest route. *(tbd)*\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"4.4 Find out the route with most and least stops. *(tbd)*\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"4.5 Find out the longest regional and night route. *(tbd)*\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"4.6 Find out two stops with maximum and minimum distance between. *(tbd)*\\n\",\n\t\t\t\t\"\\n\",\n\t\t\t\t\"4.7 Find out the average speed for route L1, L170 and L991.  *(tbd)*\"\n\t\t\t]\n\t\t}\n\t],\n\t\"metadata\": {\n\t\t\"kernelspec\": {\n\t\t\t\"display_name\": \"Python 3.9.13 64-bit (microsoft store)\",\n\t\t\t\"language\": \"python\",\n\t\t\t\"name\": \"python3\"\n\t\t},\n\t\t\"language_info\": {\n\t\t\t\"codemirror_mode\": {\n\t\t\t\t\"name\": \"ipython\",\n\t\t\t\t\"version\": 3\n\t\t\t},\n\t\t\t\"file_extension\": \".py\",\n\t\t\t\"mimetype\": \"text/x-python\",\n\t\t\t\"name\": \"python\",\n\t\t\t\"nbconvert_exporter\": \"python\",\n\t\t\t\"pygments_lexer\": \"ipython3\",\n\t\t\t\"version\": \"3.9.13\"\n\t\t},\n\t\t\"vscode\": {\n\t\t\t\"interpreter\": {\n\t\t\t\t\"hash\": \"72ce3b0a56a865d480673a9187eace210a751ef3304bdc5d2817c20bdd65e6d9\"\n\t\t\t}\n\t\t}\n\t},\n\t\"nbformat\": 4,\n\t\"nbformat_minor\": 2\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/cviceni/02_HIVE/Hive.ipynb b/cviceni/02_HIVE/Hive.ipynb
+--- a/cviceni/02_HIVE/Hive.ipynb	(revision 52017f24a3f72a2fbf659ff174a1481b59764bbb)
++++ b/cviceni/02_HIVE/Hive.ipynb	(date 1673089703399)
+@@ -1,181 +1,181 @@
+ {
+-	"cells": [{
+-			"cell_type": "markdown",
+-			"metadata": {},
+-			"source": [
+-				"The aim of the exercise is to try out:\n",
+-				"* how to get data into Hadoop\n",
+-				"* different ways to store data in Hive (partitioning, format, compression)\n",
+-				"* SQL querying over big data"
+-			]
+-		},
+-		{
+-			"cell_type": "markdown",
+-			"metadata": {},
+-			"source": [
+-				"## Uploading data to Hadoop\n",
+-				"We will work with records of PID data (routes, trips, stops).\n",
+-				"We will work with open PID data that are desribed on https://pid.cz/o-systemu/opendata/#h-gtfs.",
+-				"The zip file we work with is downloadable from http://data.pid.cz/PID_GTFS.zip\n",
+-				"Store data on HDFS: `hive_02/PID_GTFS`\n",
+-				"* **How do you create a new folder on HDFS?**\n",
+-				"* **How do you copy data a previous created folder on HDFS?**\n",
+-				"* **Is ZIP suitable format for HDFS?**\n",
+-				"* look at a few rows of the unzipped data to see the total number of rows (and try to answer the question of why this is a good thing to do);\n"
+-			]
+-		},
+-		{
+-			"cell_type": "markdown",
+-			"metadata": {},
+-			"source": [
+-				"## Starting the Hive console\n",
+-				"Start Hive from the command line via `hive` command.\n",
+-				"\n",
+-				"If you haven't created your Hive database yet, create one (enter the database name as your username) and switch to it. Hive commands must be terminated with a semicolon!\n"
+-			]
+-		},
+-		{
+-			"cell_type": "markdown",
+-			"metadata": {},
+-			"source": [
+-				"## 1. Input data as external table\n",
+-				"1.1 From the files uploaded to HDFS in the previous step choose the file routes.txt and copy them to a new folder /ext_tables/routes/\n",
+-				"\n",
+-				"1.2 Create external table *route_ext* (The external table uses the data structure as is, no format changes etc. are made in this step.)\n",
+-				"  * CSV (text) format\n",
+-				"  * field separator is \",\"\n",
+-				"  * the record separator is the line break character\n",
+-				"  * the first line contains the headers and is skipped\n",
+-				"  * the file contains the following fields:\n",
+-				"\n",
+-				"| Field | Type | Description |\n",
+-				"|-------------|-----------|--------------------------------------------|\n",
+-				"| route_id | string | id of the route |\n",
+-				"| agency_id | string | id of the agency |\n",
+-				"| route_short_name | string | short name of the route |\n",
+-				"| route_long_name |string | short name of the route  |\n",
+-				"| route_type | string | ? |\n",
+-				"| route_url | string | url of the route |\n",
+-				"| route_color | string | ? |\n",
+-				"| route_text_color | string |? |\n",
+-				"| is_night | boolean | if it is night route |\n",
+-				"| is_regional | boolean | if it is regioanl route |\n",
+-				"| is_substitute_transport | boolean | if it is substitional route|\n",
+-				"\n",
+-				"1.3 Run SQL queries performed on the external table. Check:\n",
+-				"  * extract a few rows of table *route_ext* and compare with input data;\n",
+-				"  * total number of rows and compare with input data (should not be exactly the same &ndash; why?);\n",
+-				"  * number of rows with NULL values for the fields (should be a zero of the total number of rows).\n",
+-				"\n"
+-			]
+-		},
+-		{
+-			"cell_type": "markdown",
+-			"metadata": {},
+-			"source": [
+-				"## 2. Conversion to optimized table\n",
+-				"\n",
+-				"2.1 Create an empty internal (managed) table *route* in which the data will be stored in a more suitable format and compressed:\n",
+-				"  * parquet format\n",
+-				"  * without partitioning\n",
+-				"  * snappy compression (need to specify uppercase SNAPPY)\n",
+-				"  * all fields will be the same\n",
+-				"\n",
+-				"2.2 Insert the data from the *route_ext* table into the *route* table:\n",
+-				"  * convert boolean fields\n",
+-				"  * convert the other fields unchanged.\n",
+-				"\n",
+-				"2.3 Check the *route* table:\n",
+-				"  * List a few rows.\n",
+-				"  * Find the number of records in the table *route* and compare with the number of records in the table *route_ext*.\n",
+-				"\n",
+-				"2.4 The *route* table is internal, and thus owned by Hive.\n",
+-				"  * Find it on HDFS under `hdfs://172.16.102.123:8020/user/hive/warehouse/your_database_name.db` and find its size (number of MB).\n",
+-				"  * The IP address should correspond with your cluster. \n ",
+-				"  * Compare the size with the size of the external table (the data you uploaded to HDFS, see above).\n",
+-				"\n",
+-				"2.5 In Hive, drop the external table *route_ext* (DROP TABLE). Check that the table is no longer in your database, but the data is still on HDFS."
+-			]
+-		},
+-		{
+-			"cell_type": "markdown",
+-			"metadata": {},
+-			"source": [
+-				"## 3. Table with partitions\n",
+-				"3.1 From the files uploaded to HDFS in the step one choose the file stop_times.txt and copy them to a newly created folder /ext_tables/stop_times/\n",
+-				"\n",
+-				"3.2 Create external table *stop_times_ext* (The external table uses the data structure as is, no format changes etc. are made in this step.)\n",
+-				"  * CSV (text) format\n",
+-				"  * field separator is \",\"\n",
+-				"  * the record separator is the line break character\n",
+-				"  * the first line contains the headers and is skipped\n",
+-				"  * determine fields from the file\n",
+-				"\n",
+-				"2.1 Create an empty internal (managed) table *stop_times_part* in which the data will be stored in a more suitable format and compressed:\n",
+-				"  * parquet format\n",
+-				"  * with partititioning. Partitioning column name will be named route_id\n",
+-				"  * snappy compression (need to specify uppercase SNAPPY)\n",
+-				"  * all the otheres fields will be the same as the stop_times_ext table\n",
+-				"\n",
+-				"3.2 Copy the data from table *stop_times_ext* into table *stop_times_part*, creating dynamic partitioning by route_id when copying. Dynamic partitioning must be enabled in advance using the commands:  \n",
+-				"```\n",
+-				"set hive.exec.dynamic.partition=true;\n",
+-				"set hive.exec.dynamic.partition.mode=nonstrict;\n",
+-				"```\n",
+-				"The new route_id column is calculated by the command\n",
+-				"```\n",
+-				"concat('L',REGEXP_EXTRACT(trip_id, '[0-9]*',0))\n",
+-				"```\n",
+-				"3.3 Locate the *stop_times_part* table on HDFS under `hdfs://172.16.102.123:8020/user/hive/warehouse/your_databaase_name.db` and see how the partitioning is implemented."
+-			]
+-		},
+-		{
+-			"cell_type": "markdown",
+-			"metadata": {},
+-			"source": [
+-				"## 4. Inquiry over Hive\n",
+-				"Work with the *route* and *stop_times_part* table.\n",
+-				"\n",
+-				"4.1 Find out how many unique routes are there. *(816)*\n",
+-				"\n",
+-				"4.2 Find out the lowest and highest route number are there. *(1, 997)*\n",
+-				"\n",
+-				"4.3 Find out the longest and the shortest route. *(tbd)*\n",
+-				"\n",
+-				"4.4 Find out the route with most and least stops. *(tbd)*\n",
+-				"\n",
+-				"4.5 Find out the longest regional and night route. *(tbd)*\n",
+-				"\n",
+-				"4.6 Find out two stops with maximum and minimum distance between. *(tbd)*\n",
+-				"\n",
+-				"4.7 Find out the average speed for route L1, L170 and L991.  *(tbd)*"
+-			]
+-		}
+-	],
+-	"metadata": {
+-		"kernelspec": {
+-			"display_name": "Python 3.9.13 64-bit (microsoft store)",
+-			"language": "python",
+-			"name": "python3"
+-		},
+-		"language_info": {
+-			"codemirror_mode": {
+-				"name": "ipython",
+-				"version": 3
+-			},
+-			"file_extension": ".py",
+-			"mimetype": "text/x-python",
+-			"name": "python",
+-			"nbconvert_exporter": "python",
+-			"pygments_lexer": "ipython3",
+-			"version": "3.9.13"
+-		},
+-		"vscode": {
+-			"interpreter": {
+-				"hash": "72ce3b0a56a865d480673a9187eace210a751ef3304bdc5d2817c20bdd65e6d9"
+-			}
+-		}
+-	},
+-	"nbformat": 4,
+-	"nbformat_minor": 2
++ "cells": [
++  {
++   "cell_type": "markdown",
++   "metadata": {},
++   "source": [
++    "The aim of the exercise is to try out:\n",
++    "* how to get data into Hadoop\n",
++    "* different ways to store data in Hive (partitioning, format, compression)\n",
++    "* SQL querying over big data"
++   ]
++  },
++  {
++   "cell_type": "markdown",
++   "metadata": {},
++   "source": [
++    "## Uploading data to Hadoop\n",
++    "We will work with records of PID data (routes, trips, stops).\n",
++    "We will work with open PID data that are desribed on https://pid.cz/o-systemu/opendata/#h-gtfs.The zip file we work with is downloadable from http://data.pid.cz/PID_GTFS.zip\n",
++    "Store data on HDFS: `hive_02/PID_GTFS`\n",
++    "* **How do you create a new folder on HDFS?**\n",
++    "* **How do you copy data a previous created folder on HDFS?**\n",
++    "* **Is ZIP suitable format for HDFS?**\n",
++    "* look at a few rows of the unzipped data to see the total number of rows (and try to answer the question of why this is a good thing to do);\n"
++   ]
++  },
++  {
++   "cell_type": "markdown",
++   "metadata": {},
++   "source": [
++    "## Starting the Hive console\n",
++    "Start Hive from the command line via `hive` command.\n",
++    "\n",
++    "If you haven't created your Hive database yet, create one (enter the database name as your username) and switch to it. Hive commands must be terminated with a semicolon!\n"
++   ]
++  },
++  {
++   "cell_type": "markdown",
++   "metadata": {},
++   "source": [
++    "## 1. Input data as external table\n",
++    "1.1 From the files uploaded to HDFS in the previous step choose the file routes.txt and copy them to a new folder /ext_tables/routes/\n",
++    "\n",
++    "1.2 Create external table *route_ext* (The external table uses the data structure as is, no format changes etc. are made in this step.)\n",
++    "  * CSV (text) format\n",
++    "  * field separator is \",\"\n",
++    "  * the record separator is the line break character\n",
++    "  * the first line contains the headers and is skipped\n",
++    "  * the file contains the following fields:\n",
++    "\n",
++    "| Field | Type | Description |\n",
++    "|-------------|-----------|--------------------------------------------|\n",
++    "| route_id | string | id of the route |\n",
++    "| agency_id | string | id of the agency |\n",
++    "| route_short_name | string | short name of the route |\n",
++    "| route_long_name |string | short name of the route  |\n",
++    "| route_type | string | ? |\n",
++    "| route_url | string | url of the route |\n",
++    "| route_color | string | ? |\n",
++    "| route_text_color | string |? |\n",
++    "| is_night | boolean | if it is night route |\n",
++    "| is_regional | boolean | if it is regioanl route |\n",
++    "| is_substitute_transport | boolean | if it is substitional route|\n",
++    "\n",
++    "1.3 Run SQL queries performed on the external table. Check:\n",
++    "  * extract a few rows of table *route_ext* and compare with input data;\n",
++    "  * total number of rows and compare with input data (should not be exactly the same &ndash; why?);\n",
++    "  * number of rows with NULL values for the fields (should be a zero of the total number of rows).\n",
++    "\n"
++   ]
++  },
++  {
++   "cell_type": "markdown",
++   "metadata": {},
++   "source": [
++    "## 2. Conversion to optimized table\n",
++    "\n",
++    "2.1 Create an empty internal (managed) table *route* in which the data will be stored in a more suitable format and compressed:\n",
++    "  * parquet format\n",
++    "  * without partitioning\n",
++    "  * snappy compression (need to specify uppercase SNAPPY)\n",
++    "  * all fields will be the same\n",
++    "\n",
++    "2.2 Insert the data from the *route_ext* table into the *route* table:\n",
++    "  * convert boolean fields\n",
++    "  * convert the other fields unchanged.\n",
++    "\n",
++    "2.3 Check the *route* table:\n",
++    "  * List a few rows.\n",
++    "  * Find the number of records in the table *route* and compare with the number of records in the table *route_ext*.\n",
++    "\n",
++    "2.4 The *route* table is internal, and thus owned by Hive.\n",
++    "  * Find it on HDFS under `hdfs://172.16.102.123:8020/user/hive/warehouse/your_database_name.db` and find its size (number of MB).\n",
++    "  * The IP address should correspond with your cluster. \n",
++    "   * Compare the size with the size of the external table (the data you uploaded to HDFS, see above).\n",
++    "\n",
++    "2.5 In Hive, drop the external table *route_ext* (DROP TABLE). Check that the table is no longer in your database, but the data is still on HDFS."
++   ]
++  },
++  {
++   "cell_type": "markdown",
++   "metadata": {},
++   "source": [
++    "## 3. Table with partitions\n",
++    "3.1 From the files uploaded to HDFS in the step one choose the file stop_times.txt and copy them to a newly created folder /ext_tables/stop_times/\n",
++    "\n",
++    "3.2 Create external table *stop_times_ext* (The external table uses the data structure as is, no format changes etc. are made in this step.)\n",
++    "  * CSV (text) format\n",
++    "  * field separator is \",\"\n",
++    "  * the record separator is the line break character\n",
++    "  * the first line contains the headers and is skipped\n",
++    "  * determine fields from the file\n",
++    "\n",
++    "2.1 Create an empty internal (managed) table *stop_times_part* in which the data will be stored in a more suitable format and compressed:\n",
++    "  * parquet format\n",
++    "  * with partititioning. Partitioning column name will be named route_id\n",
++    "  * snappy compression (need to specify uppercase SNAPPY)\n",
++    "  * all the otheres fields will be the same as the stop_times_ext table\n",
++    "\n",
++    "3.2 Copy the data from table *stop_times_ext* into table *stop_times_part*, creating dynamic partitioning by route_id when copying. Dynamic partitioning must be enabled in advance using the commands:  \n",
++    "```\n",
++    "set hive.exec.dynamic.partition=true;\n",
++    "set hive.exec.dynamic.partition.mode=nonstrict;\n",
++    "```\n",
++    "The new route_id column is calculated by the command\n",
++    "```\n",
++    "concat('L',REGEXP_EXTRACT(trip_id, '[0-9]*',0))\n",
++    "```\n",
++    "3.3 Locate the *stop_times_part* table on HDFS under `hdfs://172.16.102.123:8020/user/hive/warehouse/your_databaase_name.db` and see how the partitioning is implemented."
++   ]
++  },
++  {
++   "cell_type": "markdown",
++   "metadata": {},
++   "source": [
++    "## 4. Inquiry over Hive\n",
++    "Work with the *route* and *stop_times_part* table.\n",
++    "\n",
++    "4.1 Find out how many unique routes are there. *(816)*\n",
++    "\n",
++    "4.2 Find out the lowest and highest route number are there. *(1, 997)*\n",
++    "\n",
++    "4.3 Find out the longest and the shortest route. *(tbd)*\n",
++    "\n",
++    "4.4 Find out the route with most and least stops. *(tbd)*\n",
++    "\n",
++    "4.5 Find out the longest regional and night route. *(tbd)*\n",
++    "\n",
++    "4.6 Find out two stops with maximum and minimum distance between. *(tbd)*\n",
++    "\n",
++    "4.7 Find out the average speed for route L1, L170 and L991.  *(tbd)*"
++   ]
++  }
++ ],
++ "metadata": {
++  "kernelspec": {
++   "display_name": "Python 3.9.13 64-bit (microsoft store)",
++   "language": "python",
++   "name": "python3"
++  },
++  "language_info": {
++   "codemirror_mode": {
++    "name": "ipython",
++    "version": 3
++   },
++   "file_extension": ".py",
++   "mimetype": "text/x-python",
++   "name": "python",
++   "nbconvert_exporter": "python",
++   "pygments_lexer": "ipython3",
++   "version": "3.9.13"
++  },
++  "vscode": {
++   "interpreter": {
++    "hash": "72ce3b0a56a865d480673a9187eace210a751ef3304bdc5d2817c20bdd65e6d9"
++   }
++  }
++ },
++ "nbformat": 4,
++ "nbformat_minor": 2
+ }
